@@ -12,7 +12,10 @@ export class CustomAuthorizeError extends AuthError {
 
 export default {
   providers: [
-    GitHub,
+    GitHub({
+      clientId: process.env.GITHUB_CLIENT_ID,
+      clientSecret: process.env.GITHUB_CLIENT_SECRET,
+    }),
     Google,
     Credentials({
       async authorize(credentials): Promise<any> {

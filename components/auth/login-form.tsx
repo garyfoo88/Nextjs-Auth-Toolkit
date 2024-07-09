@@ -19,6 +19,7 @@ import FormError from "../form-error";
 import FormSuccess from "../form-success";
 import { login } from "@/actions/login";
 import { useState, useTransition } from "react";
+import { redirect } from "next/navigation";
 
 export default function LoginForm() {
   const [isPending, startTransition] = useTransition();
@@ -36,13 +37,14 @@ export default function LoginForm() {
   const onSubmit = (values: z.infer<typeof LoginSchema>) => {
     setError("");
     setSuccess("");
-
     startTransition(async () => {
-      const { success, error } = await login(values);
-      if (success) {
-        setSuccess(success);
-      } else {
-        setError(error);
+      const loginState = await login(values);
+
+      if (loginState?.success) {
+        redirect("/settings");
+      }
+      if (loginState?.error) {
+        setError(loginState?.error);
       }
     });
   };

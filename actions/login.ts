@@ -2,9 +2,7 @@
 
 import { signIn } from "@/auth";
 import { CustomAuthorizeError } from "@/auth.config";
-import { DEFAULT_LOGIN_REDIRECT } from "@/routes";
 import { LoginSchema } from "@/schema";
-import { AuthError } from "next-auth";
 import { z } from "zod";
 
 export const login = async (values: z.infer<typeof LoginSchema>) => {
@@ -12,19 +10,20 @@ export const login = async (values: z.infer<typeof LoginSchema>) => {
   if (validateFields.error) return { error: "Invalid fields" };
 
   const { email, password } = validateFields.data;
+
   try {
+    // Disable redirect for this function. signIn uses next redirect and next redirect cannot be used within try catch
     await signIn("credentials", {
       email,
       password,
-      redirectTo: DEFAULT_LOGIN_REDIRECT,
+      redirect: false,
     });
+    return { success: "Login successful" };
   } catch (error) {
     if (error instanceof CustomAuthorizeError) {
       if (error.code === "Invalid Credentials")
         return { error: "Invalid credentials" };
-      return { error: "Something went wrong!" };
     }
-
-    throw error;
+    return { error: "Something went wrong!" };
   }
 };
