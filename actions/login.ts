@@ -2,6 +2,8 @@
 
 import { signIn } from "@/auth";
 import { CustomAuthorizeError } from "@/auth.config";
+import { getUserByEmail } from "@/data/user";
+import { generateVerificationToken } from "@/lib/tokens";
 import { LoginSchema } from "@/schema";
 import { z } from "zod";
 
@@ -10,6 +12,20 @@ export const login = async (values: z.infer<typeof LoginSchema>) => {
   if (validateFields.error) return { error: "Invalid fields" };
 
   const { email, password } = validateFields.data;
+
+  const existingUser = await getUserByEmail(email);
+
+  if (!existingUser || !existingUser.email) {
+    return { error: "Email does not exist" };
+  }
+
+  if (!existingUser.emailVerified) {
+    const verificationToken = await generateVerificationToken(
+      existingUser.email
+    );
+
+    return { success: "Confirmation email sent!" };
+  }
 
   try {
     // Disable redirect for this function. signIn uses next redirect and next redirect cannot be used within try catch
