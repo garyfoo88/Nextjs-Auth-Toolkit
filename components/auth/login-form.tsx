@@ -45,9 +45,11 @@ export default function LoginForm() {
     setSuccess("");
     startTransition(async () => {
       const loginState = await login(values);
-
       if (loginState?.success) {
-        redirect("/settings");
+        setSuccess(loginState?.success);
+        if (loginState.success === "Login successful") {
+          redirect("/settings");
+        }
       }
       if (loginState?.error) {
         setError(loginState?.error);

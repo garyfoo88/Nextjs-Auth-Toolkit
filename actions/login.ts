@@ -3,6 +3,7 @@
 import { signIn } from "@/auth";
 import { CustomAuthorizeError } from "@/auth.config";
 import { getUserByEmail } from "@/data/user";
+import { sendVerificationEmail } from "@/lib/mail";
 import { generateVerificationToken } from "@/lib/tokens";
 import { LoginSchema } from "@/schema";
 import { z } from "zod";
@@ -20,10 +21,11 @@ export const login = async (values: z.infer<typeof LoginSchema>) => {
   }
 
   if (!existingUser.emailVerified) {
-    const verificationToken = await generateVerificationToken(
+    const { email, token } = await generateVerificationToken(
       existingUser.email
     );
 
+    await sendVerificationEmail(email, token);
     return { success: "Confirmation email sent!" };
   }
 
